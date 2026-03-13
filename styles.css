@@ -1,0 +1,823 @@
+/* ============================================
+   Ohako Link Page - Clean Edition
+   ============================================ */
+
+:root {
+    --pink-soft: #fef0f5;
+    --pink-light: #fcd5e3;
+    --pink-medium: #f8c8d8;
+    --pink-accent: #e8a4be;
+    --pink-deep: #d4879e;
+    --cream: #fffbf7;
+    --text-dark: #8b6b7d;
+    --text-medium: #a88a99;
+    --text-light: #c9a8b8;
+    --white: #ffffff;
+    --shadow-pink: rgba(232, 164, 190, 0.15);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Quicksand', sans-serif;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--cream);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================
+   CLEAN LOADING SCREEN
+   ============================================ */
+.loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    background: linear-gradient(135deg, #fffbf7 0%, #fff5f8 50%, #fef0f5 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 1;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.loader.hidden {
+    opacity: 0;
+    transform: scale(1.02);
+    pointer-events: none;
+}
+
+/* Loader Content */
+.loader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+}
+
+/* Bouncing emoticon - centered */
+.loader-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0px;
+    animation: iconBounce 1.8s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    color: var(--pink-deep);
+    font-family: monospace;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.loader-ears {
+    font-size: 1rem;
+    letter-spacing: 0.55em;
+    padding-left: 0.55em;
+    opacity: 0.85;
+    line-height: 1.2;
+}
+
+.loader-face {
+    font-size: 1.5rem;
+    line-height: 1.2;
+}
+
+@keyframes iconBounce {
+    0%   { transform: translateY(0) scale(1, 1); }
+    15%  { transform: translateY(-18px) scale(0.97, 1.04); }
+    30%  { transform: translateY(0) scale(1.04, 0.96); }
+    42%  { transform: translateY(-8px) scale(0.99, 1.02); }
+    55%  { transform: translateY(0) scale(1.01, 0.99); }
+    100% { transform: translateY(0) scale(1, 1); }
+}
+
+.loader-text {
+    font-family: 'Miniver', cursive;
+    font-size: 1.6rem;
+    color: var(--text-dark);
+}
+
+.loader-think {
+    font-family: 'Miniver', cursive;
+    font-size: 1.2rem;
+    color: var(--pink-deep);
+}
+
+/* ============================================
+   Loading Bar with Rolling Stars ☆
+   ============================================ */
+.loader-bar {
+    width: 220px;
+    height: 22px;
+    background: var(--white);
+    border-radius: 20px;
+    border: 2px solid var(--pink-light);
+    overflow: hidden;
+    margin-top: 12px;
+}
+
+.loader-progress {
+    height: 100%;
+    width: 0%;
+    background: var(--pink-medium);
+    border-radius: 20px;
+    animation: progressFill 2s ease-out forwards;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    padding: 0 4px;
+}
+
+/* Each star spins individually */
+.star {
+    font-size: 11px;
+    color: white;
+    display: inline-block;
+    animation: starSpin 0.8s linear infinite;
+    text-shadow: 0 1px 2px rgba(212, 135, 158, 0.5);
+}
+
+.star:nth-child(1) { animation-delay: 0s; }
+.star:nth-child(2) { animation-delay: 0.1s; }
+.star:nth-child(3) { animation-delay: 0.2s; }
+.star:nth-child(4) { animation-delay: 0.3s; }
+.star:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes starSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes progressFill {
+    0% { width: 0%; }
+    20% { width: 25%; }
+    50% { width: 60%; }
+    80% { width: 90%; }
+    100% { width: 100%; }
+}
+
+/* ============================================
+   Spiral + Pink Blob Transition
+   ============================================ */
+.swirl-transition {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    z-index: 9998;
+    pointer-events: none;
+    opacity: 0;
+}
+
+/* Phase 1: canvas spiral is visible */
+.swirl-transition.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* Phase 3: entire canvas fades out */
+.swirl-transition.fade-out {
+    animation: pinkFade 0.9s ease-in-out forwards;
+}
+
+@keyframes pinkFade {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+#swirlCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* ============================================
+   Striped Background — straight horizontal
+   ============================================ */
+.stripes-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        90deg,
+        var(--cream) 0px,
+        var(--cream) 20px,
+        rgba(252, 213, 227, 0.15) 20px,
+        rgba(252, 213, 227, 0.15) 40px
+    );
+    z-index: -3;
+}
+
+/* ============================================
+   Floating Decorations
+   ============================================ */
+.floating-elements {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.deco {
+    position: absolute;
+    font-size: 1.3rem;
+    color: var(--pink-accent);
+    opacity: 0.6;
+    animation: decoFloat 6s ease-in-out infinite;
+    will-change: transform;
+}
+
+/* 6 decos — corners + sides, well spaced */
+.deco-1 { top: 7%;  left: 6%;   animation-delay: 0s;    font-size: 1.5rem; }
+.deco-2 { top: 10%; right: 8%;  animation-delay: -2s;   font-size: 1.2rem; }
+.deco-3 { top: 42%; left: 5%;   animation-delay: -1s;   font-size: 1.4rem; }
+.deco-4 { top: 48%; right: 6%;  animation-delay: -3s;   font-size: 1.3rem; }
+.deco-5 { top: 78%; left: 7%;   animation-delay: -4s;   font-size: 1.6rem; }
+.deco-6 { top: 82%; right: 7%;  animation-delay: -1.5s; font-size: 1.2rem; }
+
+@keyframes decoFloat {
+    0%   { transform: translateY(0)     rotate(0deg)  scale(1);    }
+    25%  { transform: translateY(-16px) rotate(10deg) scale(1.1);  }
+    50%  { transform: translateY(-8px)  rotate(-6deg) scale(0.95); }
+    75%  { transform: translateY(-20px) rotate(5deg)  scale(1.08); }
+    100% { transform: translateY(0)     rotate(0deg)  scale(1);    }
+}
+
+/* ============================================
+   Gradient Orbs
+   ============================================ */
+.gradient-orbs {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -2;
+    overflow: hidden;
+}
+
+.orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.4;
+    animation: orbFloat 12s ease-in-out infinite;
+}
+
+.orb-1 {
+    width: 300px;
+    height: 300px;
+    background: linear-gradient(135deg, var(--pink-light), var(--pink-medium));
+    top: -100px;
+    right: -100px;
+    animation-delay: 0s;
+}
+
+.orb-2 {
+    width: 250px;
+    height: 250px;
+    background: linear-gradient(135deg, var(--pink-medium), var(--pink-accent));
+    bottom: 20%;
+    left: -80px;
+    animation-delay: -4s;
+}
+
+.orb-3 {
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(135deg, var(--pink-soft), var(--pink-light));
+    bottom: -50px;
+    right: 20%;
+    animation-delay: -8s;
+}
+
+@keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(20px, -20px) scale(1.05); }
+    66% { transform: translate(-15px, 15px) scale(0.95); }
+}
+
+/* ============================================
+   Main Container
+   ============================================ */
+.container {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 60px 24px 40px;
+    padding-top: max(60px, env(safe-area-inset-top));
+    padding-bottom: max(40px, env(safe-area-inset-bottom));
+    min-height: 100vh;
+    min-height: 100dvh;
+    position: relative;
+    opacity: 0;
+}
+
+.container.visible {
+    opacity: 1;
+}
+
+/* ============================================
+   Profile Section
+   ============================================ */
+.profile-section {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.profile-image-wrapper {
+    position: relative;
+    width: 130px;
+    height: 130px;
+    margin: 0 auto 24px;
+    cursor: pointer;
+}
+
+.container.visible .profile-image-wrapper {
+    animation: profileIn 0.7s cubic-bezier(0.25, 0, 0, 1) 0s both;
+}
+
+@keyframes profileIn {
+    0%   { opacity: 0; transform: translateY(-30px) scale(0.9); }
+    100% { opacity: 1; transform: translateY(0)     scale(1);   }
+}
+
+.profile-glow {
+    position: absolute;
+    top: -18px;
+    left: -18px;
+    right: -18px;
+    bottom: -18px;
+    background: radial-gradient(circle, rgba(248, 200, 216, 0.6) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: glowPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% { transform: scale(1);    opacity: 0.5; }
+    50%       { transform: scale(1.15); opacity: 0.8; }
+}
+
+.profile-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid var(--white);
+    box-shadow: 0 8px 32px rgba(232, 164, 190, 0.35),
+                0 0 0 3px var(--pink-light);
+    position: relative;
+    z-index: 2;
+    animation: photoFloat 3.5s ease-in-out infinite,
+               photoBorderPulse 3s ease-in-out infinite;
+}
+
+@keyframes photoFloat {
+    0%, 100% { transform: translateY(0)    scale(1);    }
+    40%       { transform: translateY(-9px) scale(1.02); }
+    60%       { transform: translateY(-7px) scale(1.01); }
+}
+
+@keyframes photoBorderPulse {
+    0%, 100% { box-shadow: 0 8px 32px rgba(232, 164, 190, 0.35), 0 0 0 3px var(--pink-light);  }
+    50%       { box-shadow: 0 8px 42px rgba(232, 164, 190, 0.55), 0 0 0 5px var(--pink-medium); }
+}
+
+.profile-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.profile-image-wrapper:active .profile-photo {
+    transform: scale(1.06);
+}
+
+/* Profile sparkles — bigger & more visible on mobile */
+.profile-sparkle {
+    position: absolute;
+    font-size: 1.1rem;
+    color: var(--pink-deep);
+    z-index: 3;
+    animation: sparkleFloat 2.2s ease-in-out infinite;
+}
+
+.sparkle-1 { top: 2%;   right: -4%;  animation-delay: 0s;    }
+.sparkle-2 { bottom: 5%; left: -8%;  animation-delay: 0.6s;  }
+.sparkle-3 { top: 48%;  right: -12%; animation-delay: 1.1s;  }
+
+@keyframes sparkleFloat {
+    0%, 100% { transform: scale(1)   translateY(0)   rotate(0deg);   opacity: 0.7; }
+    50%       { transform: scale(1.4) translateY(-7px) rotate(20deg);  opacity: 1;   }
+}
+
+/* ============================================
+   Username
+   ============================================ */
+.username {
+    font-family: 'Miniver', cursive;
+    font-size: 3.2rem;
+    color: var(--text-dark);
+    font-weight: 400;
+    margin-bottom: 8px;
+    letter-spacing: 3px;
+    display: block;
+}
+
+.letter {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.container.visible .letter:nth-child(1) {
+    animation: letterIn 0.5s cubic-bezier(0.25, 0, 0, 1) 0.1s forwards,
+               letterWave 4s 1.5s ease-in-out infinite;
+}
+.container.visible .letter:nth-child(2) {
+    animation: letterIn 0.5s cubic-bezier(0.25, 0, 0, 1) 0.18s forwards,
+               letterWave 4s 1.7s ease-in-out infinite;
+}
+.container.visible .letter:nth-child(3) {
+    animation: letterIn 0.5s cubic-bezier(0.25, 0, 0, 1) 0.26s forwards,
+               letterWave 4s 1.9s ease-in-out infinite;
+}
+.container.visible .letter:nth-child(4) {
+    animation: letterIn 0.5s cubic-bezier(0.25, 0, 0, 1) 0.34s forwards,
+               letterWave 4s 2.1s ease-in-out infinite;
+}
+.container.visible .letter:nth-child(5) {
+    animation: letterIn 0.5s cubic-bezier(0.25, 0, 0, 1) 0.42s forwards,
+               letterWave 4s 2.3s ease-in-out infinite;
+}
+
+@keyframes letterIn {
+    0%   { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes letterWave {
+    0%, 100% { transform: translateY(0);     }
+    50%       { transform: translateY(-12px); }
+}
+
+.tagline {
+    font-size: 0.95rem;
+    color: var(--text-medium);
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+    font-weight: 400;
+    opacity: 0;
+}
+
+.container.visible .tagline {
+    animation: taglineIn 0.6s cubic-bezier(0.25, 0, 0, 1) 0.55s both,
+               taglinePulse 5s 1.8s ease-in-out infinite;
+}
+
+@keyframes taglineIn {
+    0%   { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes taglinePulse {
+    0%, 100% { opacity: 1;   }
+    50%       { opacity: 0.6; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   Links Section
+   ============================================ */
+.links-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ============================================
+   Link Cards
+   ============================================ */
+.link-card {
+    display: flex;
+    align-items: center;
+    padding: 18px 20px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 20px;
+    text-decoration: none;
+    color: var(--text-dark);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 4px 20px var(--shadow-pink),
+        0 1px 3px rgba(0,0,0,0.02);
+    border: 1px solid rgba(252, 213, 227, 0.3);
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.container.visible .link-card {
+    animation: cardEntrance 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.container.visible .link-card:nth-child(1) { animation-delay: 0.65s; }
+.container.visible .link-card:nth-child(2) { animation-delay: 0.78s; }
+.container.visible .link-card:nth-child(3) { animation-delay: 0.91s; }
+
+@keyframes cardEntrance {
+    0%   { opacity: 0; transform: translateY(24px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Staggered override with idle float */
+.container.visible .link-card:nth-child(1) { animation: cardIn 0.6s cubic-bezier(0.25, 0, 0, 1) 0.65s forwards, cardIdle 5s 1.6s ease-in-out infinite; }
+.container.visible .link-card:nth-child(2) { animation: cardIn 0.6s cubic-bezier(0.25, 0, 0, 1) 0.80s forwards, cardIdle 5s 1.9s ease-in-out infinite; }
+.container.visible .link-card:nth-child(3) { animation: cardIn 0.6s cubic-bezier(0.25, 0, 0, 1) 0.95s forwards, cardIdle 5s 2.2s ease-in-out infinite; }
+
+@keyframes cardIn {
+    0%   { opacity: 0; transform: translateY(24px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardIdle {
+    0%, 100% { transform: translateY(0);   }
+    50%       { transform: translateY(-4px); }
+}
+
+/* Card background */
+.card-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(254,240,245,0.8) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+}
+
+/* Card shine effect */
+.card-shine {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+    transition: left 0.5s ease;
+    z-index: 1;
+}
+
+.link-card:hover .card-shine {
+    left: 100%;
+}
+
+.link-card:hover {
+    transform: translateY(-6px) scale(1.02) rotate(-0.4deg);
+    box-shadow: 
+        0 16px 40px rgba(232, 164, 190, 0.3),
+        0 4px 12px rgba(232, 164, 190, 0.15);
+    border-color: rgba(232, 164, 190, 0.55);
+}
+
+.link-card:hover .card-bg {
+    opacity: 1;
+}
+
+.link-card:active {
+    transform: scale(0.97) rotate(0deg);
+    transition: transform 0.1s ease;
+}
+
+/* Icon wobbles on hover */
+.link-card:hover .link-icon {
+    animation: iconWiggle 0.45s ease forwards;
+}
+
+@keyframes iconWiggle {
+    0%   { transform: scale(1)    rotate(0deg);   }
+    20%  { transform: scale(1.18) rotate(-8deg);  }
+    45%  { transform: scale(1.12) rotate(7deg);   }
+    65%  { transform: scale(1.1)  rotate(-4deg);  }
+    80%  { transform: scale(1.08) rotate(2deg);   }
+    100% { transform: scale(1.1)  rotate(0deg);   }
+}
+
+/* Arrow becomes a bouncing ♡ on hover */
+.link-arrow {
+    font-size: 1.1rem;
+    color: var(--pink-accent);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.link-card:hover .link-arrow {
+    animation: arrowBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    color: var(--pink-deep);
+}
+
+@keyframes arrowBounce {
+    0%   { transform: translateX(0)   scale(1);    }
+    40%  { transform: translateX(8px) scale(1.3);  }
+    70%  { transform: translateX(4px) scale(0.9);  }
+    100% { transform: translateX(6px) scale(1.1);  }
+}
+
+/* ============================================
+   Social Icons
+   ============================================ */
+.link-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+
+.link-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.link-icon.instagram,
+.link-icon.youtube,
+.link-icon.tiktok {
+    background: linear-gradient(135deg, #f8c8d8 0%, #e8a4be 100%);
+    color: white;
+}
+
+/* ============================================
+   Link Content
+   ============================================ */
+.link-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: relative;
+    z-index: 2;
+}
+
+.link-title {
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-dark);
+}
+
+.link-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    font-weight: 400;
+}
+
+/* ============================================
+   Divider
+   ============================================ */
+.divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 40px 0 30px;
+    opacity: 0;
+}
+
+.container.visible .divider {
+    animation: fadeIn 0.6s ease 1s forwards;
+}
+
+.divider-deco {
+    font-size: 0.9rem;
+    color: var(--pink-accent);
+}
+
+.divider-text {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    letter-spacing: 2px;
+    text-transform: lowercase;
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+.footer {
+    text-align: center;
+    padding-top: 20px;
+    opacity: 0;
+}
+
+.container.visible .footer {
+    animation: fadeIn 0.6s ease 1.1s forwards;
+}
+
+.footer-deco {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.footer-deco span {
+    font-size: 1rem;
+    color: var(--pink-medium);
+    animation: heartBeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartBeat {
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.15); }
+    30% { transform: scale(1); }
+}
+
+/* ============================================
+   Touch Device Optimizations
+   ============================================ */
+@media (hover: none) {
+    .link-card:active {
+        transform: scale(0.96) rotate(-0.3deg);
+        box-shadow: 0 16px 40px rgba(232, 164, 190, 0.3);
+        transition: transform 0.12s ease;
+    }
+
+    .link-card:active .link-icon {
+        animation: iconWiggle 0.45s ease forwards;
+    }
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 380px) {
+    .container {
+        padding: 50px 20px 30px;
+    }
+    
+    .username {
+        font-size: 2.8rem;
+    }
+    
+    .profile-image-wrapper {
+        width: 110px;
+        height: 110px;
+    }
+    
+    .link-card {
+        padding: 16px 18px;
+    }
+    
+    .link-icon {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* ============================================
+   Reduced Motion
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
