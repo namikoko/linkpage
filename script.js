@@ -1,4 +1,103 @@
 /* ============================================
+   Click Tracking
+   ============================================ */
+
+// Simple click tracking function
+function trackClick(element) {
+    // Get the link information
+    const linkTitle = element.querySelector('.link-title')?.textContent || 'Unknown';
+    const linkUrl = element.href || 'No URL';
+    const timestamp = new Date().toISOString();
+    
+    // Log to console (for testing)
+    console.log('🔗 Link clicked:', {
+        title: linkTitle,
+        url: linkUrl,
+        timestamp: timestamp,
+        userAgent: navigator.userAgent.substring(0, 50) + '...'
+    });
+    
+    // Send event to Google Analytics (if gtag is available)
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'click', {
+            event_category: 'social_links',
+            event_label: linkTitle,
+            value: 1,
+            custom_parameters: {
+                link_url: linkUrl,
+                link_title: linkTitle
+            }
+        });
+        console.log('📊 Event sent to Google Analytics');
+    }
+    
+    // Store in localStorage for persistence (backup tracking)
+    const clicks = JSON.parse(localStorage.getItem('linkClicks') || '[]');
+    clicks.push({
+        title: linkTitle,
+        url: linkUrl,
+        timestamp: timestamp,
+        userAgent: navigator.userAgent
+    });
+    
+    // Keep only the last 100 clicks to prevent storage bloat
+    if (clicks.length > 100) {
+        clicks.splice(0, clicks.length - 100);
+    }
+    
+    localStorage.setItem('linkClicks', JSON.stringify(clicks));
+}
+
+// Function to view all tracked clicks
+function viewClickHistory() {
+    const clicks = JSON.parse(localStorage.getItem('linkClicks') || '[]');
+    console.table(clicks);
+    return clicks;
+}
+
+// Function to export click data
+function exportClickData() {
+    const clicks = JSON.parse(localStorage.getItem('linkClicks') || '[]');
+    const dataStr = JSON.stringify(clicks, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `ohako_link_clicks_${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+}
+
+// Initialize click tracking keyboard shortcuts
+function initClickTracking() {
+    document.addEventListener('keydown', (e) => {
+        // Press 'S' to view Stats
+        if (e.key.toLowerCase() === 's' && e.ctrlKey) {
+            e.preventDefault();
+            console.log('📊 Click Statistics:');
+            const clicks = viewClickHistory();
+            
+            // Show summary
+            const summary = clicks.reduce((acc, click) => {
+                acc[click.title] = (acc[click.title] || 0) + 1;
+                return acc;
+            }, {});
+            
+            console.log('📈 Summary:', summary);
+            console.log('💾 Total clicks tracked:', clicks.length);
+        }
+        
+        // Press Ctrl+E to Export data
+        if (e.key.toLowerCase() === 'e' && e.ctrlKey) {
+            e.preventDefault();
+            exportClickData();
+            console.log('📁 Click data exported!');
+        }
+    });
+}
+
+/* ============================================
    Ohako Link Page - Epic Interactions
    ============================================ */
 
@@ -8,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initParallax();
     initTouchFeedback();
     initEasterEgg();
+    initClickTracking();
 });
 
 /* ============================================
@@ -195,6 +295,9 @@ function initCardEffects() {
         
         // Ripple on click
         card.addEventListener('click', (e) => {
+            // Track the click
+            trackClick(card);
+            
             createRipple(e, card);
         });
     });
