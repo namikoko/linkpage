@@ -394,33 +394,84 @@ function initTouchFeedback() {
     const cards = document.querySelectorAll('.link-card');
     
     cards.forEach(card => {
-        card.addEventListener('touchstart', () => {
-            card.style.transform = 'scale(0.97)';
+        let touchActive = false;
+        
+        card.addEventListener('touchstart', (e) => {
+            touchActive = true;
+            // Use CSS class instead of inline styles to avoid conflicts
+            card.classList.add('touch-active');
         }, { passive: true });
         
-        card.addEventListener('touchend', () => {
-            card.style.transform = '';
-            card.style.animation = 'cardBounce 0.4s ease';
-            setTimeout(() => {
-                card.style.animation = '';
-            }, 400);
+        card.addEventListener('touchend', (e) => {
+            if (touchActive) {
+                touchActive = false;
+                card.classList.remove('touch-active');
+                
+                // Add a small delay before bounce to ensure the touch is properly handled
+                setTimeout(() => {
+                    if (!touchActive) { // Only bounce if not touched again
+                        card.classList.add('touch-bounce');
+                        setTimeout(() => {
+                            card.classList.remove('touch-bounce');
+                        }, 400);
+                    }
+                }, 50);
+            }
         }, { passive: true });
         
         card.addEventListener('touchcancel', () => {
-            card.style.transform = '';
+            touchActive = false;
+            card.classList.remove('touch-active');
         }, { passive: true });
+        
+        // Ensure cleanup on mouse events (for devices that support both)
+        card.addEventListener('mouseleave', () => {
+            touchActive = false;
+            card.classList.remove('touch-active');
+        });
     });
     
-    // Add bounce animation
-    const bounceStyle = document.createElement('style');
-    bounceStyle.textContent = `
-        @keyframes cardBounce {
+    // Add CSS classes for touch feedback
+    const touchStyle = document.createElement('style');
+    touchStyle.textContent = `
+        .link-card.touch-active {
+            transform: scale(0.97) !important;
+            transition: transform 0.1s ease !important;
+        }
+        
+        .link-card.touch-bounce {
+            animation: mobileBounce 0.4s ease !important;
+        }
+        
+        @keyframes mobileBounce {
             0% { transform: scale(0.97); }
             50% { transform: scale(1.02); }
             100% { transform: scale(1); }
         }
+        
+        /* Ensure cards remain visible during touch */
+        .link-card {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        /* Override any conflicting active states on touch devices */
+        @media (hover: none) {
+            .link-card:active {
+                transform: none !important;
+                transition: none !important;
+            }
+            
+            .link-card.touch-active {
+                transform: scale(0.96) !important;
+                box-shadow: 0 16px 40px rgba(232, 164, 190, 0.3) !important;
+                transition: all 0.12s ease !important;
+            }
+        }
     `;
-    document.head.appendChild(bounceStyle);
+    document.head.appendChild(touchStyle);
 }
 
 /* ============================================

@@ -771,18 +771,26 @@ body {
     30% { transform: scale(1); }
 }
 
-/* ============================================
-   Touch Device Optimizations
-   ============================================ */
+/* Touch Device Optimizations - Improved mobile stability */
 @media (hover: none) {
+    /* Disable default active state to prevent conflicts with JS touch handling */
     .link-card:active {
-        transform: scale(0.96) rotate(-0.3deg);
-        box-shadow: 0 16px 40px rgba(232, 164, 190, 0.3);
-        transition: transform 0.12s ease;
+        transform: none;
+        box-shadow: inherit;
+        transition: none;
     }
 
     .link-card:active .link-icon {
-        animation: iconWiggle 0.45s ease forwards;
+        animation: none;
+    }
+    
+    /* Ensure smooth interactions */
+    .link-card {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        touch-action: manipulation;
     }
 }
 
